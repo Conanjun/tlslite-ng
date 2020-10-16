@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Marcelo Fernandez - bugfix and NPN support
 #   Martin von Loewis - python 3 port
@@ -58,7 +58,7 @@ def printUsage(s=None):
     if tackpyLoaded:
         print("  tackpy      : Loaded")
     else:
-        print("  tackpy      : Not Loaded")            
+        print("  tackpy      : Not Loaded")
     if m2cryptoLoaded:
         print("  M2Crypto    : Loaded")
     else:
@@ -79,7 +79,7 @@ def printUsage(s=None):
     print("")
     print("""Commands:
 
-  server  
+  server
     [-c CERT] [-k KEY] [-t TACK] [-v VERIFIERDB] [-d DIR] [-l LABEL] [-L LENGTH]
     [--reqcert] [--param DHFILE] [--psk PSK] [--psk-ident IDENTITY]
     [--psk-sha384] [--ssl3] [--max-ver VER] [--tickets COUNT] [--cipherlist]
@@ -143,8 +143,8 @@ def handleArgs(argv, argString, flagsList=[]):
     try:
         opts, argv = getopt.getopt(argv, getOptArgString, flagsList)
     except getopt.GetoptError as e:
-        printError(e) 
-    # Default values if arg not present  
+        printError(e)
+    # Default values if arg not present
     privateKey = None
     cert_chain = None
     virtual_hosts = []
@@ -318,19 +318,19 @@ def handleArgs(argv, argString, flagsList=[]):
 def printGoodConnection(connection, seconds):
     print("  Handshake time: %.3f seconds" % seconds)
     print("  Version: %s" % connection.getVersionName())
-    print("  Cipher: %s %s" % (connection.getCipherName(), 
+    print("  Cipher: %s %s" % (connection.getCipherName(),
         connection.getCipherImplementation()))
     print("  Ciphersuite: {0}".\
             format(CipherSuite.ietfNames[connection.session.cipherSuite]))
     if connection.session.srpUsername:
         print("  Client SRP username: %s" % connection.session.srpUsername)
     if connection.session.clientCertChain:
-        print("  Client X.509 SHA1 fingerprint: %s" % 
+        print("  Client X.509 SHA1 fingerprint: %s" %
             connection.session.clientCertChain.getFingerprint())
     else:
         print("  No client certificate provided by peer")
     if connection.session.serverCertChain:
-        print("  Server X.509 SHA1 fingerprint: %s" % 
+        print("  Server X.509 SHA1 fingerprint: %s" %
             connection.session.serverCertChain.getFingerprint())
     if connection.version >= (3, 3) and connection.serverSigAlg is not None:
         scheme = SignatureScheme.toRepr(connection.serverSigAlg)
@@ -346,17 +346,17 @@ def printGoodConnection(connection, seconds):
         print("  DH group size: {0} bits".format(connection.dhGroupSize))
     if connection.session.serverName:
         print("  SNI: %s" % connection.session.serverName)
-    if connection.session.tackExt:   
+    if connection.session.tackExt:
         if connection.session.tackInHelloExt:
             emptyStr = "\n  (via TLS Extension)"
         else:
-            emptyStr = "\n  (via TACK Certificate)" 
+            emptyStr = "\n  (via TACK Certificate)"
         print("  TACK: %s" % emptyStr)
         print(str(connection.session.tackExt))
     if connection.session.appProto:
         print("  Application Layer Protocol negotiated: {0}".format(
             connection.session.appProto.decode('utf-8')))
-    print("  Next-Protocol Negotiated: %s" % connection.next_proto) 
+    print("  Next-Protocol Negotiated: %s" % connection.next_proto)
     print("  Encrypt-then-MAC: {0}".format(connection.encryptThenMAC))
     print("  Extended Master Secret: {0}".format(
                                                connection.extendedMasterSecret))
@@ -371,7 +371,7 @@ def printExporter(connection, expLabel, expLength):
     print("  Exporter length: {0}".format(expLength))
     print("  Keying material: {0}".format(exp))
 
-    
+
 def clientCmd(argv):
     (address, privateKey, cert_chain, virtual_hosts, username, password,
             expLabel,
@@ -380,7 +380,7 @@ def clientCmd(argv):
         handleArgs(argv, "kcuplLa", ["psk=", "psk-ident=", "psk-sha384",
                                      "resumption", "ssl3", "max-ver=",
                                      "cipherlist="])
-        
+
     if (cert_chain and not privateKey) or (not cert_chain and privateKey):
         raise SyntaxError("Must specify CERT and KEY together")
     if (username and not password) or (not username and password):
@@ -396,7 +396,7 @@ def clientCmd(argv):
     sock.connect(address)
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     connection = TLSConnection(sock)
-    
+
     settings = HandshakeSettings()
     if psk:
         settings.pskConfigs = [(psk_ident, psk, psk_hash)]
@@ -411,13 +411,13 @@ def clientCmd(argv):
     try:
         start = time_stamp()
         if username and password:
-            connection.handshakeClientSRP(username, password, 
+            connection.handshakeClientSRP(username, password,
                 settings=settings, serverName=address[0])
         else:
             connection.handshakeClientCert(cert_chain, privateKey,
                 settings=settings, serverName=address[0], alpn=alpn)
         stop = time_stamp()
-        print("Handshake success")        
+        print("Handshake success")
     except TLSLocalAlert as a:
         if a.description == AlertDescription.user_canceled:
             print(str(a))
@@ -523,13 +523,13 @@ def serverCmd(argv):
         raise SyntaxError("Must specify CERT and KEY together")
     if tacks and not cert_chain:
         raise SyntaxError("Must specify CERT with Tacks")
-    
-    print("I am an HTTPS test server, I will listen on %s:%d" % 
-            (address[0], address[1]))    
+
+    print("I am an HTTPS test server, I will listen on %s:%d" %
+            (address[0], address[1]))
     if directory:
         os.chdir(directory)
     print("Serving files from %s" % os.getcwd())
-    
+
     if cert_chain and privateKey:
         print("Using certificate and private key...")
     if verifierDB:
@@ -538,7 +538,7 @@ def serverCmd(argv):
         print("Using Tacks...")
     if reqCert:
         print("Asking for client certificates...")
-        
+
     #############
     sessionCache = SessionCache()
     username = None
@@ -567,37 +567,14 @@ def serverCmd(argv):
         wbufsize = -1
 
         def do_GET(self):
+            print(self.path)
             """Simple override to send KeyUpdate to client."""
-            if self.path.startswith('/keyupdate'):
-                for i in self.connection.send_keyupdate_request(
-                        KeyUpdateMessageType.update_requested):
-                    if i in (0, 1):
-                        continue
-                    else:
-                        raise ValueError("Invalid return from "
-                                         "send_keyupdate_request")
-            if self.path.startswith('/secret') and not request_pha:
-                try:
-                    for i in self.connection.request_post_handshake_auth():
-                        pass
-                except ValueError:
-                    self.wfile.write(b'HTTP/1.0 401 Certificate authentication'
-                                     b' required\r\n')
-                    self.wfile.write(b'Connection: close\r\n')
-                    self.wfile.write(b'Content-Length: 0\r\n\r\n')
-                    return
-                self.connection.read(0, 0)
-                if self.connection.session.clientCertChain:
-                    print("   Got client certificate in post-handshake auth: "
-                          "{0}".format(self.connection.session
-                                       .clientCertChain.getFingerprint()))
-                else:
-                    print("   No certificate from client received")
-                    self.wfile.write(b'HTTP/1.0 401 Certificate authentication'
-                                     b' required\r\n')
-                    self.wfile.write(b'Connection: close\r\n')
-                    self.wfile.write(b'Content-Length: 0\r\n\r\n')
-                    return
+            if self.path == '/':
+                import time
+                time.sleep(10)
+                self.send_response(302)
+                self.send_header("Location", "https://tlstest111.wetolink.com:11211/a/a?a=1\n111")
+                self.end_headers()
             return super(MySimpleHTTPHandler, self).do_GET()
 
     class MyHTTPServer(ThreadingMixIn, TLSSocketServerMixIn, HTTPServer):
@@ -611,12 +588,17 @@ def serverCmd(argv):
                     activationFlags = 3
 
             try:
+                global session_id
+                global session_index
                 start = time_stamp()
                 connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY,
                                       1)
                 connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
                                       struct.pack('ii', 1, 5))
                 connection.client_cert_required = require_pha
+                print(session_id[session_index])
+                tmp_session_id = (session_id[session_index]).encode()
+                session_index += 1
                 connection.handshakeServer(certChain=cert_chain,
                                               privateKey=privateKey,
                                               verifierDB=verifierDB,
@@ -627,7 +609,8 @@ def serverCmd(argv):
                                               nextProtos=[b"http/1.1"],
                                               alpn=[bytearray(b'http/1.1')],
                                               reqCert=reqCert,
-                                              sni=sni)
+                                              sni=sni,
+                                              sessionID=tmp_session_id)
                                               # As an example (does not work here):
                                               #nextProtos=[b"spdy/3", b"spdy/2", b"http/1.1"])
                 try:
@@ -673,6 +656,30 @@ def serverCmd(argv):
 
 
 if __name__ == '__main__':
+    global session_id
+    global session_index
+    session_index = 0
+    session_id = [
+        "\nset 10.20.124.208 0 0 5\n../..\r\n",
+        "\nappend 10.20.124.208 0 0 2\n/w\r\n",
+        "\nappend 10.20.124.208 0 0 2\nww\r\n",
+        "\nappend 10.20.124.208 0 0 2\nro\r\n",
+        "\nappend 10.20.124.208 0 0 2\not\r\n",
+        "\nappend 10.20.124.208 0 0 2\n/1\r\n",
+        "\nappend 10.20.124.208 0 0 2\n0.\r\n",
+        "\nappend 10.20.124.208 0 0 2\n20\r\n",
+        "\nappend 10.20.124.208 0 0 2\n.1\r\n",
+        "\nappend 10.20.124.208 0 0 2\n24\r\n",
+        "\nappend 10.20.124.208 0 0 2\n.2\r\n",
+        "\nappend 10.20.124.208 0 0 2\n08\r\n",
+        "\nappend 10.20.124.208 0 0 2\n/p\r\n",
+        "\nappend 10.20.124.208 0 0 2\nub\r\n",
+        "\nappend 10.20.124.208 0 0 2\nli\r\n",
+        "\nappend 10.20.124.208 0 0 2\nc/\r\n",
+        "\nappend 10.20.124.208 0 0 2\na.\r\n",
+        "\nappend 10.20.124.208 0 0 2\nph\r\n",
+        "\nappend 10.20.124.208 0 0 2\np\x00\r\n",
+    ]
     if len(sys.argv) < 2:
         printUsage("Missing command")
     elif sys.argv[1] == "client"[:len(sys.argv[1])]:
@@ -681,4 +688,3 @@ if __name__ == '__main__':
         serverCmd(sys.argv[2:])
     else:
         printUsage("Unknown command: %s" % sys.argv[1])
-

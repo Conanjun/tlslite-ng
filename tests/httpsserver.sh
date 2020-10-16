@@ -1,2 +1,2 @@
 #!/bin/sh
-python ../scripts/tls.py server -k serverX509Key.pem -c serverX509Cert.pem -t TACK1.pem localhost:4443
+python3 ../scripts/tls.py server --max-ver tls1.2 -k 2_tlstest111.wetolink.com.key -c 1_tlstest111.wetolink.com_bundle.crt localhost:11210
